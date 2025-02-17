@@ -94,3 +94,76 @@ func SearchProducts(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"data": products, "count": count})
 }
+func UpdateProducts(c *gin.Context) {
+	email, ok := c.Get("email")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot fetch email from context"})
+		return
+	}
+	if email != constants.AdminUser {
+		c.JSON(http.StatusBadGateway, gin.H{"message": "user not authorized"})
+		return
+	}
+	var product model.UpdateProduct
+	var req model.Products
+	err := c.BindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in binding"})
+		return
+	}
+	productdatabse, err := database.Mgr.GetOneProduct(product.Id, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in fetching from database"})
+		return
+	}
+	req.ID = productdatabse.ID
+	req.Name = productdatabse.Name
+	req.Price = productdatabse.Price
+	req.ImageUrl = productdatabse.ImageUrl
+	req.Description = productdatabse.Description
+	req.MetaInfo = productdatabse.MetaInfo
+	req.CreatedAt = productdatabse.CreatedAt
+	req.UpdatedAt = time.Now().Unix()
+	if product.Name != "" {
+		req.Name = product.Name
+	}
+	if product.Description != "" {
+		req.Description = product.Description
+	}
+	if product.Price > 0 {
+		req.Price = product.Price
+	}
+	err = database.Mgr.UpdateProduct(req, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in updating product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "updated successfully"})
+}
+func DeleteProduct(c *gin.Context) {
+	email, ok := c.Get("email")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot fetch email from context"})
+		return
+	}
+	if email != constants.AdminUser {
+		c.JSON(http.StatusBadGateway, gin.H{"message": "user not authorized"})
+		return
+	}
+	id := c.Query("id")
+	product, err := database.Mgr.GetOneProduct(id, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in geting data from databse"})
+		return
+	}
+	if product.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no product with such name present"})
+		return
+	}
+	err = database.Mgr.DeleteOneProduct(id, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in deleting databse"})
+		return
+	}
+	c.JSON(http.StatusBadRequest, gin.H{"message": "Deletion successful"})
+}

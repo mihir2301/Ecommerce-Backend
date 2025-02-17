@@ -75,7 +75,7 @@ func (mgr *manager) GetSingleRecordForUser(email string, collectionName string) 
 func (mgr *manager) GetSingleRecordByProductName(name, collection string) *model.Products {
 	p := &model.Products{}
 	filter := bson.M{"name": name}
-	connect := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	connect := mgr.connection.Database(constants.Database).Collection(collection)
 	err := connect.FindOne(context.TODO(), filter).Decode(&p)
 	if err != nil {
 		fmt.Println("error at getting product details")
@@ -89,7 +89,7 @@ func (mgr *manager) GetListProducts(page, limit, offset int, collectionName stri
 	if offset > 0 {
 		skip = offset
 	}
-	connection := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	connection := mgr.connection.Database(constants.Database).Collection(collectionName)
 	findOptions := options.Find()
 	findOptions.SetSkip(int64(skip))
 	findOptions.SetLimit(int64(limit))
@@ -113,7 +113,7 @@ func (mgr *manager) SearchProducts(page, limit, offset int, search, collectionNa
 	if offset > 0 {
 		skip = offset
 	}
-	connection := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	connection := mgr.connection.Database(constants.Database).Collection(collectionName)
 	findoptions := options.Find()
 	findoptions.SetSkip(int64(skip))
 	findoptions.SetLimit(int64(limit))
@@ -136,4 +136,34 @@ func (mgr *manager) SearchProducts(page, limit, offset int, search, collectionNa
 	}
 	count, err = connection.CountDocuments(context.TODO(), searchfilter)
 	return products, count, err
+}
+
+func (mgr *manager) GetOneProduct(id string, collectionName string) (product model.Products, err error) {
+	primitiveID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		fmt.Println("canot change id to hex")
+		return
+	}
+	filter := bson.M{"_id": primitiveID}
+	connect := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	err = connect.FindOne(context.TODO(), filter).Decode(&product)
+	return product, err
+}
+func (mgr *manager) UpdateProduct(product model.Products, collectionName string) error {
+	filter := bson.M{"_id": product.ID}
+	update := bson.M{"$set": product}
+	connect := mgr.connection.Database(constants.Database).Collection(collectionName)
+	_, err := connect.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
+func (mgr *manager) DeleteOneProduct(id, collectionName string) error {
+	primitiveId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"_id": primitiveId}
+	connect := mgr.connection.Database(constants.Database).Collection(collectionName)
+	_, err = connect.DeleteOne(context.TODO(), filter)
+	return err
 }

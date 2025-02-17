@@ -20,3 +20,10 @@ type ClientProducts struct {
 	ImageUrl    string                 `json:"image_url" bson:"image_url"`
 	MetaInfo    map[string]interface{} `json:"meta_information" bson:"meta_information"`
 }
+
+type UpdateProduct struct {
+	Id          string  `json:"_id"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Name        string  `json:"name"`
+}

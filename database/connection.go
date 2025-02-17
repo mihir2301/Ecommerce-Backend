@@ -27,6 +27,9 @@ type Manager interface {
 	GetSingleRecordByProductName(string, string) *model.Products
 	GetListProducts(int, int, int, string) ([]model.Products, int64, error)
 	SearchProducts(int, int, int, string, string) ([]model.Products, int64, error)
+	GetOneProduct(string, string) (model.Products, error)
+	UpdateProduct(model.Products, string) error
+	DeleteOneProduct(string, string) error
 }
 
 func ConnectDb() {
