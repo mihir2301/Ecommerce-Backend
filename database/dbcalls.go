@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (mgr *manager) Insert(data interface{}, collectionName string) (interface{}, error) {
@@ -80,4 +82,58 @@ func (mgr *manager) GetSingleRecordByProductName(name, collection string) *model
 		return p
 	}
 	return p
+}
+func (mgr *manager) GetListProducts(page, limit, offset int, collectionName string) (product []model.Products, count int64, err error) {
+	//pagination
+	skip := ((page - 1) * limit)
+	if offset > 0 {
+		skip = offset
+	}
+	connection := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	findOptions := options.Find()
+	findOptions.SetSkip(int64(skip))
+	findOptions.SetLimit(int64(limit))
+	// break kar kar ke products detail return karega
+	curr, err := connection.Find(context.TODO(), bson.M{}, findOptions)
+	if err != nil {
+		fmt.Println("Error in getting products")
+		return nil, 0, nil
+	}
+	err = curr.All(context.TODO(), &product)
+	if err != nil {
+		fmt.Println("Error in getting products")
+		return nil, 0, nil
+	}
+	count, err = connection.CountDocuments(context.TODO(), bson.M{})
+	return product, count, err
+}
+
+func (mgr *manager) SearchProducts(page, limit, offset int, search, collectionName string) (products []model.Products, count int64, err error) {
+	skip := ((page - 1) * limit)
+	if offset > 0 {
+		skip = offset
+	}
+	connection := mgr.connection.Database(constants.Database).Collection(constants.ProductCollection)
+	findoptions := options.Find()
+	findoptions.SetSkip(int64(skip))
+	findoptions.SetLimit(int64(limit))
+	searchfilter := bson.M{}
+	if len(search) >= 3 {
+		searchfilter["$or"] = []bson.M{
+			{"name": primitive.Regex{Pattern: ".*" + search + ".*", Options: "i"}},
+			{"description": primitive.Regex{Pattern: ".*" + search + ".*", Options: "i"}},
+		}
+	}
+	cur, err := connection.Find(context.TODO(), searchfilter, findoptions)
+	if err != nil {
+		fmt.Println("error in seraching products in database")
+		return
+	}
+	err = cur.All(context.TODO(), &products)
+	if err != nil {
+		fmt.Println("error in binding products")
+		return
+	}
+	count, err = connection.CountDocuments(context.TODO(), searchfilter)
+	return products, count, err
 }

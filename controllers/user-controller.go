@@ -224,18 +224,14 @@ func UserLogin(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
 }
-func Registerproducts(c *gin.Context) {
 
-}
 func UpdateProducts(c *gin.Context) {
 
 }
 func DeleteProduct(c *gin.Context) {
 
 }
-func ListProductsController(c *gin.Context) {
 
-}
 func SearchProducts(c *gin.Context) {
 
 }

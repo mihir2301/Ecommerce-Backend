@@ -25,6 +25,8 @@ type Manager interface {
 	UpdateEmailVerifiedStatus(model.Verification, string) error
 	GetSingleRecordForUser(string, string) *model.Users
 	GetSingleRecordByProductName(string, string) *model.Products
+	GetListProducts(int, int, int, string) ([]model.Products, int64, error)
+	SearchProducts(int, int, int, string, string) ([]model.Products, int64, error)
 }
 
 func ConnectDb() {

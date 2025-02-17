@@ -59,3 +59,38 @@ func Registerproducts(c *gin.Context) {
 	p.ID = id.(primitive.ObjectID)
 	c.JSON(http.StatusOK, gin.H{"message": "product registerd succesfuly", "data": p})
 }
+
+func ListProductsController(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	limit := c.DefaultQuery("limit", "10")
+	offset := c.DefaultQuery("offset", "0") //kaha se start karo
+
+	pageInt := helper.ConvertStringToInteger(page)
+	limitInt := helper.ConvertStringToInteger(limit)
+	offsetInt := helper.ConvertStringToInteger(offset)
+
+	products, count, err := database.Mgr.GetListProducts(pageInt, limitInt, offsetInt, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": products, "count": count})
+}
+
+func SearchProducts(c *gin.Context) {
+
+	page := c.DefaultQuery("page", "1")
+	limit := c.DefaultQuery("limit", "10")
+	offset := c.DefaultQuery("offset", "0")
+	search := c.Query("search")
+	pageInt := helper.ConvertStringToInteger(page)
+	limitInt := helper.ConvertStringToInteger(limit)
+	offsetInt := helper.ConvertStringToInteger(offset)
+
+	products, count, err := database.Mgr.SearchProducts(pageInt, limitInt, offsetInt, search, constants.ProductCollection)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": products, "count": count})
+}

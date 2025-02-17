@@ -2,7 +2,9 @@ package helper
 
 import (
 	"errors"
+	"fmt"
 	model "golang_project/models"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,4 +47,13 @@ func CheckProductValidation(p model.ClientProducts) error {
 		return errors.New("price cannot be empty")
 	}
 	return nil
+}
+
+func ConvertStringToInteger(s string) int {
+	val, err := strconv.Atoi(s)
+	if err != nil {
+		fmt.Println("Error at conversion")
+		return 0
+	}
+	return val
 }
