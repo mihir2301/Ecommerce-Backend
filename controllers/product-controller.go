@@ -95,13 +95,18 @@ func SearchProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": products, "count": count})
 }
 func UpdateProducts(c *gin.Context) {
-	email, ok := c.Get("email")
+	useremail, ok := c.Get("email")
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot fetch email from context"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "cant fetch email from context"})
 		return
 	}
-	if email != constants.AdminUser {
-		c.JSON(http.StatusBadGateway, gin.H{"message": "user not authorized"})
+	user := database.Mgr.GetSingleRecordForUser(useremail.(string), constants.UsersCollection)
+	if user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		return
+	}
+	if user.UserType != constants.AdminUser {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Not a admin so cannot register product"})
 		return
 	}
 	var product model.UpdateProduct
@@ -141,13 +146,18 @@ func UpdateProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "updated successfully"})
 }
 func DeleteProduct(c *gin.Context) {
-	email, ok := c.Get("email")
+	useremail, ok := c.Get("email")
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot fetch email from context"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "cant fetch email from context"})
 		return
 	}
-	if email != constants.AdminUser {
-		c.JSON(http.StatusBadGateway, gin.H{"message": "user not authorized"})
+	user := database.Mgr.GetSingleRecordForUser(useremail.(string), constants.UsersCollection)
+	if user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		return
+	}
+	if user.UserType != constants.AdminUser {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Not a admin so cannot register product"})
 		return
 	}
 	id := c.Query("id")
@@ -165,5 +175,5 @@ func DeleteProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "error in deleting databse"})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "Deletion successful"})
+	c.JSON(http.StatusOK, gin.H{"message": "Deletion successful"})
 }

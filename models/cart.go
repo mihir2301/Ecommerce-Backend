@@ -8,3 +8,9 @@ type Cart struct {
 	ProductID primitive.ObjectID `json:"product_id" bson:"product_id,omitempty"`
 	Checkout  bool               `json:"checkout" bson:"checkout"`
 }
+
+type UserCart struct {
+	UserId    string `json:"user_id" bson:"user_id,omitempty"`
+	ProductID string `json:"product_id" bson:"product_id,omitempty"`
+	Checkout  bool   `json:"checkout" bson:"checkout"`
+}

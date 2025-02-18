@@ -3,8 +3,8 @@ module golang_project
 go 1.23.3
 
 require (
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/gin-gonic/gin v1.10.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	go.mongodb.org/mongo-driver v1.17.2

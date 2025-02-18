@@ -3,11 +3,10 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type UsersClient struct {
-	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Name     string             `json:"name" bson:"name"`
-	Email    string             `json:"email" bson:"email" binding:"required"`
-	Phone    string             `json:"phone" bson:"phone"`
-	Password string             `json:"password" bsom:"password"`
+	Name     string `json:"name" bson:"name"`
+	Email    string `json:"email" bson:"email" binding:"required"`
+	Phone    string `json:"phone" bson:"phone"`
+	Password string `json:"password" bsom:"password"`
 }
 type Users struct {
 	ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
@@ -26,6 +25,13 @@ type Address struct {
 	UserID   primitive.ObjectID `json:"user_id" bson:"user_id,omitempty"`
 	City     string             `json:"city" bson:"city"`
 	Country  string             `json:"country" bson:"country"`
+}
+
+type AddressClient struct {
+	Address1 string `json:"address1" bson:"address1"`
+	UserID   string `json:"user_id" bson:"user_id,omitempty"`
+	City     string `json:"city" bson:"city"`
+	Country  string `json:"country" bson:"country"`
 }
 
 type Verification struct {

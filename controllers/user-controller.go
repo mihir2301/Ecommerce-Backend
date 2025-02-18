@@ -181,7 +181,7 @@ func RegisterUser(c *gin.Context) {
 	jwtWrapper := auth.JwtWrapper{
 		SecretKey:      os.Getenv("JwtSecrets"),
 		Issuer:         os.Getenv("JwtIssuer"),
-		Expirationtime: 48,
+		ExpirationTime: 48,
 	}
 	userId := id.(primitive.ObjectID)
 	//gen token
@@ -215,7 +215,7 @@ func UserLogin(c *gin.Context) {
 	jwtwrapper := auth.JwtWrapper{
 		SecretKey:      os.Getenv("JwtSecrets"),
 		Issuer:         os.Getenv("JwtIssuer"),
-		Expirationtime: 48,
+		ExpirationTime: 48,
 	}
 	token, err := jwtwrapper.GenerateToken(user.ID, user.Email, user.UserType)
 	if err != nil {
@@ -225,21 +225,72 @@ func UserLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
 }
 
-func UpdateProducts(c *gin.Context) {
-
-}
-func DeleteProduct(c *gin.Context) {
-
-}
-
-func SearchProducts(c *gin.Context) {
-
-}
 func AddToCart(c *gin.Context) {
-
+	email, ok := c.Get("email")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in getching email"})
+		return
+	}
+	user := database.Mgr.GetSingleRecordByMail(email.(string), constants.UsersCollection)
+	address, err := database.Mgr.GetSingleAddress(user.ID, constants.AddressCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error at fetching address"})
+		return
+	}
+	if address.Address1 == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "address required"})
+		return
+	}
+	var cart model.UserCart
+	var dbcart model.Cart
+	err = c.BindJSON(&cart)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "binding problem"})
+		return
+	}
+	dbcart.ProductID, _ = primitive.ObjectIDFromHex(cart.ProductID)
+	dbcart.UserId, _ = primitive.ObjectIDFromHex(cart.UserId)
+	dbcart.Checkout = false
+	_, err = database.Mgr.Insert(dbcart, constants.Cartcollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error at inserting"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "added to cart"})
 }
 func AddAddressOfUser(c *gin.Context) {
-
+	email, ok := c.Get("email")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Not authorized"})
+		return
+	}
+	user := database.Mgr.GetSingleRecordByMail(email.(string), constants.UsersCollection)
+	if user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user not authorized"})
+		return
+	}
+	var address model.AddressClient
+	var addressdb model.Address
+	err := c.BindJSON(&address)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in binding"})
+		return
+	}
+	id, err := primitive.ObjectIDFromHex(address.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in converting id"})
+		return
+	}
+	addressdb.UserID = id
+	addressdb.Address1 = address.Address1
+	addressdb.City = address.City
+	addressdb.Country = address.Country
+	_, err = database.Mgr.Insert(addressdb, constants.AddressCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error at inserting"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"mesage": "address successfully added"})
 }
 func GetSingleUser(c *gin.Context) {
 

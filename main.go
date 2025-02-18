@@ -21,13 +21,14 @@ func init() {
 	hashpassword := helper.GenPassHash("1234")
 	user := model.Users{
 		Name:     "Admin",
-		Email:    "admin@123",
+		Email:    "admin@gmail.com",
 		Password: hashpassword,
 		UserType: constants.AdminUser,
 	}
 	u := database.Mgr.GetSingleRecordForUser(user.Email, constants.UsersCollection)
 	if u.Email == "" {
-		_, err := database.Mgr.Insert(user, constants.UsersCollection)
+		var data interface{} = user
+		_, err := database.Mgr.Insert(data, constants.UsersCollection)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -167,3 +167,9 @@ func (mgr *manager) DeleteOneProduct(id, collectionName string) error {
 	_, err = connect.DeleteOne(context.TODO(), filter)
 	return err
 }
+func (mgr *manager) GetSingleAddress(id primitive.ObjectID, collectionName string) (address model.Address, err error) {
+	connect := mgr.connection.Database(constants.Database).Collection(constants.AddressCollection)
+	filter := bson.M{"user_id": id}
+	err = connect.FindOne(context.TODO(), filter).Decode(&address)
+	return address, err
+}

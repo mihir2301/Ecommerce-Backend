@@ -22,7 +22,7 @@ const (
 	ListProductRoute     = "/list-products"
 	SearchProductRoute   = "/search"
 	UpdateproductRoute   = "/update-product"
-	DeleteProductRoute   = "/delte-product"
+	DeleteProductRoute   = "/delete-product"
 	AddToCartRoute       = "/cart"
 	AddAddressRoute      = "/address"
 	GetSingleUserRoute   = "/user/:id"
@@ -44,4 +44,6 @@ const (
 	Verification      = "Verification"
 	UsersCollection   = "User"
 	ProductCollection = "products"
+	AddressCollection = "address"
+	Cartcollection    = "cart"
 )

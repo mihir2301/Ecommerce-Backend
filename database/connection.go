@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -30,6 +31,7 @@ type Manager interface {
 	GetOneProduct(string, string) (model.Products, error)
 	UpdateProduct(model.Products, string) error
 	DeleteOneProduct(string, string) error
+	GetSingleAddress(primitive.ObjectID, string) (model.Address, error)
 }
 
 func ConnectDb() {
