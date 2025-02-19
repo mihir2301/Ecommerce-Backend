@@ -27,7 +27,7 @@ const (
 	AddAddressRoute      = "/address"
 	GetSingleUserRoute   = "/user/:id"
 	UpdateUser           = "/update-user"
-	CheckOutRoute        = "/user/:id"
+	CheckOutRoute        = "/checkout/:id"
 )
 
 const (

@@ -168,8 +168,42 @@ func (mgr *manager) DeleteOneProduct(id, collectionName string) error {
 	return err
 }
 func (mgr *manager) GetSingleAddress(id primitive.ObjectID, collectionName string) (address model.Address, err error) {
-	connect := mgr.connection.Database(constants.Database).Collection(constants.AddressCollection)
+	connect := mgr.connection.Database(constants.Database).Collection(collectionName)
 	filter := bson.M{"user_id": id}
 	err = connect.FindOne(context.TODO(), filter).Decode(&address)
 	return address, err
+}
+func (mgr *manager) GetOneUserByID(id primitive.ObjectID, collectionName string) (user model.Users) {
+	connection := mgr.connection.Database(constants.Database).Collection(collectionName)
+	filter := bson.M{"_id": id}
+	err := connection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		fmt.Println("error in finding user data")
+	}
+	return user
+}
+func (mgr *manager) UpdateUser(user model.Users, collectionName string) error {
+	connection := mgr.connection.Database(constants.Database).Collection(collectionName)
+	filter := bson.M{"_id": user.ID}
+	Update := bson.M{"$set": user}
+	_, err := connection.UpdateOne(context.TODO(), filter, Update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (mgr *manager) GetCart(id primitive.ObjectID, collectionName string) (cart model.Cart, err error) {
+	connect := mgr.connection.Database(constants.Database).Collection(collectionName)
+	filter := bson.M{"_id": id}
+	err = connect.FindOne(context.TODO(), filter).Decode(&cart)
+	return cart, err
+}
+
+func (mgr *manager) UpdateCart(cart model.Cart, collectionName string) error {
+	connect := mgr.connection.Database(constants.Database).Collection(collectionName)
+	filter := bson.M{"_id": cart.ID}
+	update := bson.M{"$set": cart}
+	_, err := connect.UpdateOne(context.TODO(), filter, update)
+	return err
 }

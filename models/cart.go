@@ -10,7 +10,7 @@ type Cart struct {
 }
 
 type UserCart struct {
-	UserId    string `json:"user_id" bson:"user_id,omitempty"`
-	ProductID string `json:"product_id" bson:"product_id,omitempty"`
+	UserId    string `json:"user_id" bson:"user_id" binding:"required"`
+	ProductID string `json:"product_id" bson:"product_id" binding:"required"`
 	Checkout  bool   `json:"checkout" bson:"checkout"`
 }

@@ -293,11 +293,68 @@ func AddAddressOfUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"mesage": "address successfully added"})
 }
 func GetSingleUser(c *gin.Context) {
-
+	userIDstr := c.Param("id")
+	userId, err := primitive.ObjectIDFromHex(userIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "unable to convert id to hex"})
+		return
+	}
+	user := database.Mgr.GetOneUserByID(userId, constants.UsersCollection)
+	if user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no user present"})
+		return
+	}
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{"message": "user detaiils are", "data": user})
 }
 func UpdateUser(c *gin.Context) {
+	var userupdatedata model.UserUpdate
+	err := c.BindJSON(&userupdatedata)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in binding user update data"})
+		return
+	}
+	userID, err := primitive.ObjectIDFromHex(userupdatedata.Id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in converting user data to hex"})
+		return
+	}
+	user := database.Mgr.GetOneUserByID(userID, constants.UsersCollection)
+	if user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "email not present for specific user"})
+		return
+	}
+	var userdb model.Users
+	userdb.ID = userID
+	userdb.Email = user.Email
+	userdb.Name = user.Name
+	userdb.Password = user.Password
+	userdb.Phone = user.Phone
+	userdb.UserType = user.UserType
+	userdb.CreatedAt = user.CreatedAt
+	userdb.UpdatedAt = time.Now().Unix()
 
-}
-func CheckOutOrder(c *gin.Context) {
-
+	if userupdatedata.Email != "" {
+		resp := database.Mgr.GetSingleRecordByMail(userupdatedata.Email, constants.Verification)
+		if resp == nil || !resp.Status {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "eamil not verified first verify your email"})
+			return
+		}
+		userdb.Email = userupdatedata.Email
+	}
+	if userupdatedata.Name != "" {
+		userdb.Name = userupdatedata.Name
+	}
+	if userupdatedata.Phone != "" {
+		userdb.Phone = userupdatedata.Phone
+	}
+	if userupdatedata.Password != "" {
+		userdb.Password = helper.GenPassHash(userupdatedata.Password)
+	}
+	err = database.Mgr.UpdateUser(userdb, constants.UsersCollection)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error at updating user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }

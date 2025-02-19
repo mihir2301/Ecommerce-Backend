@@ -32,6 +32,10 @@ type Manager interface {
 	UpdateProduct(model.Products, string) error
 	DeleteOneProduct(string, string) error
 	GetSingleAddress(primitive.ObjectID, string) (model.Address, error)
+	GetOneUserByID(primitive.ObjectID, string) model.Users
+	UpdateUser(model.Users, string) error
+	GetCart(primitive.ObjectID, string) (model.Cart, error)
+	UpdateCart(model.Cart, string) error
 }
 
 func ConnectDb() {
