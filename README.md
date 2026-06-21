@@ -1,3 +1,1 @@
-1. Run go build
-2. Run go run main.go
-   
+problem in go sum debug and fix it to reach 
